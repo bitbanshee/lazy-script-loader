@@ -1,12 +1,36 @@
 ;(function (environment) {
-	Object.assign(environment, buildLazyLoader());
+	Object.assign(environment, init());
 
-	function buildLazyLoader() {
+	function init() {
+		const lazyLoader = {
+			// Used as a default prefix for URLs when calling `importScript` using string as param
+			defaultURLPrefix: '',
+			/**
+			 * (Object|string) -> Promise
+			 * @param {Object|string} info
+			 * @param {String} info.name
+			 * @param {String} info.url
+			 * @return {PromiseLike<object>}
+			 */
+			importScript: lazyLoad_,
+			/**
+			 * Array<object|string> -> Array<PromiseLike<object>>
+			 * @param {Array<{ name: string, url: string }|string>}
+			 * @return {Array<PromiseLike<object>>}
+			 */
+			importScripts: function (infos) {
+				return infos.map(lazyLoad_);
+			}
+		};
+
+		return lazyLoader;
+
 		/**
 		 * Object -> Function
 		 * @param {Object} info
 		 * @param {String} info.name
 		 * @param {String} info.url
+		 * @return {Function}
 		 */
 		function promiseLoad_(info) {
 			return (resolve, reject) => {
@@ -24,22 +48,22 @@
 					reject(...arguments);
 				}
 
-				// Fire the loading
 				head.appendChild(script);
 			}
 		}
 
 		/**
-		 * Object -> Promise
-		 * @param {Object} info
+		 * (Object|string) -> Promise
+		 * @param {Object|string} info
 		 * @param {String} info.name
 		 * @param {String} info.url
+		 * @return {PromiseLike<object>}
 		 */
 		function lazyLoad_(info) {
 			if (typeof info == 'string') {
 				info = {
 					name: info,
-					url: info + '.js'
+					url: lazyLoader.defaultURLPrefix + info + '.js'
 				}
 			}
 
@@ -49,12 +73,5 @@
 
 			return new Promise(promiseLoad_(info));
 		}
-
-		return {
-			importScript: lazyLoad_,
-			importScripts: function (infos) {
-				return infos.map(lazyLoad_);
-			}
-		};
 	}
 })(window);
