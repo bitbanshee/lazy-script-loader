@@ -1,5 +1,5 @@
-;(function (obj) {
-	Object.assign(obj, buildLazyLoader());
+;(function (environment) {
+	Object.assign(environment, buildLazyLoader());
 
 	function buildLazyLoader() {
 		/**
@@ -17,7 +17,7 @@
 
 				script.onload = function () {
 					head.removeChild(script);
-					resolve(obj[info.name]);
+					resolve(environment[info.name]);
 				};
 
 				script.onerror = function () {
@@ -36,8 +36,15 @@
 		 * @param {String} info.url
 		 */
 		function lazyLoad_(info) {
-			if (obj[info.name]) {
-				return Promise.resolve(obj[info.name]);
+			if (typeof info == 'string') {
+				info = {
+					name: info,
+					url: info + '.js'
+				}
+			}
+
+			if (environment[info.name]) {
+				return Promise.resolve(environment[info.name]);
 			}
 
 			return new Promise(promiseLoad_(info));
