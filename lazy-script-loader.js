@@ -1,4 +1,5 @@
-;(function ({ environment, localEnvironment, scriptURLPrefix }) {
+;Object.assign(window,
+(function ({ environment, localEnvironment, scriptURLPrefix }) {
 	return init();
 
 	function init() {
@@ -217,4 +218,4 @@
 })({
 	environment: window,
 	scriptURLPrefix: 'scripts/'
-});
+}));
